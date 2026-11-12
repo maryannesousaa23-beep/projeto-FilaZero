@@ -82,5 +82,5 @@ Quatro testes das regras puras podem ser executados com Node 22 mesmo sem Neon. 
 - `TESTES.md`: roteiro de testes funcionais e de segurança.
 - `CHANGELOG.md`: decisões, correções e limitações registradas.
 
-## Observação sobre o estado do projeto
-O repositório GitHub, o projeto Vercel e o domínio de produção já estão configurados. O build de produção foi concluído com sucesso e a página inicial respondeu pelo domínio público. A conexão ao Neon foi testada; a branch principal do banco ainda precisa receber o schema e o seed do administrador antes de o fluxo completo de cadastro, login e fila poder ser validado.
+## Estado real da publicação — 12/11/2026
+O repositório GitHub, o projeto Vercel e o domínio de produção estão configurados. O build do commit `6d524f1` foi concluído como READY e as páginas públicas responderam. O schema de cinco tabelas foi aplicado à branch default `production` do Neon. **A aplicação ainda não está operacional em produção:** `DATABASE_URL` e `DIRECT_URL` estão sem valor nas variáveis de ambiente da Vercel; a tabela `User` está vazia; o seed e a conta ADMIN ainda não foram executados. Configure as duas conexões como variáveis sensíveis no painel Vercel, faça novo deploy e execute o seed em ambiente seguro. Não declare o fluxo completo como testado antes de validar cadastro, login e fila.
