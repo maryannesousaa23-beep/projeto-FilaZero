@@ -6,10 +6,10 @@ Este documento separa **testes executados** de **testes pendentes**. Não marque
 
 | ID | Cenário | Resultado esperado | Situação atual |
 |---|---|---|---|
-| T01 | Cadastro válido | Conta CLIENT criada com bcrypt e redirecionamento ao login | Pendente: banco ainda não conectado à Vercel |
+| T01 | Cadastro válido | Conta CLIENT criada com bcrypt e redirecionamento ao login | **Passou para conta titular**: cadastro persistiu no Neon; conta foi promovida a ADMIN após confirmação do titular |
 | T02 | E-mail duplicado | Servidor recusa duplicidade com mensagem clara | Pendente: integração |
 | T03 | Validação no servidor | Nome, e-mail e senha inválidos são recusados | Código revisado; teste integrado pendente |
-| T04 | Login válido | Sessão criada e painel acessível | Pendente: não há usuário no Neon |
+| T04 | Login ADMIN | Sessão autenticada e painel administrativo acessível | **Passou manualmente**: titular confirmou que conseguiu entrar e visualizar o painel ADMIN |
 | T05 | Login inválido | Acesso negado sem revelar o campo incorreto | Pendente: integração |
 | T06 | Serviços ativos | Lista apenas serviços ativos com descrição e duração | Pendente: banco sem registros iniciais |
 | T07 | Gerar senha | Código diário sequencial e status WAITING | Pendente: integração |
@@ -37,7 +37,7 @@ Este documento separa **testes executados** de **testes pendentes**. Não marque
 | Rotas privadas sem sessão | **Passou** | /dashboard, /admin, /staff e /estabelecimentos redirecionaram para /login |
 | Schema Neon na branch de produção | **Passou** | 5 tabelas: User, Establishment, StaffEstablishment, Service e QueueEntry |
 | Tipos e relacionamentos no Neon | **Passou** | Enums Role e QueueStatus; 6 chaves estrangeiras verificadas |
-| Conta ADMIN inicial | **Pendente** | Consulta à tabela User retornou zero registros |
+| Conta ADMIN inicial | **Passou** | Conta `maryannesousaa23@gmail.com` existe como ADMIN e está vinculada ao estabelecimento principal; titular confirmou acesso ao painel |
 | Estabelecimento inicial | **Parcial** | O seed executado durante um build criou `filazero-seed-establishment` antes de falhar por ausência de `SEED_ADMIN_PASSWORD` |
 | Serviço inicial | **Passou** | `Atendimento Geral` criado no Neon com prefixo ATD, média de 10 minutos e ativo |
 | Conexão Vercel → Neon | **Passou para runtime** | `/estabelecimentos` respondeu HTTP 200 e exibiu os dados reais consultados no Neon; valores sensíveis permanecem mascarados pela API |
@@ -83,8 +83,8 @@ Configure `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_ES
 
 - [ ] DATABASE_URL e DIRECT_URL configuradas na Vercel.
 - [ ] Deploy READY depois da configuração do banco.
-- [ ] Seed executado e conta ADMIN confirmada no Neon.
-- [ ] Login ADMIN validado.
+- [x] Conta ADMIN criada a partir do cadastro do titular, promovida no Neon e vinculada ao estabelecimento principal.
+- [x] Login ADMIN validado pelo titular com acesso ao painel.
 - [ ] Cadastro CLIENT e login validados.
 - [ ] Entrada, acompanhamento, cancelamento e posição validados.
 - [ ] STAFF criado pelo ADMIN e fluxo de chamada/início/conclusão validado.
