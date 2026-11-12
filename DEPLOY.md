@@ -29,13 +29,12 @@ Antes, crie no GitHub um repositório vazio chamado `filazero`. Não marque para
    - `DATABASE_URL`: connection string pooled do Neon (host com `-pooler`, SSL habilitado e `pgbouncer=true`).
    - `DIRECT_URL`: connection string direta do Neon (host sem `-pooler`, SSL habilitado), usada pelo Prisma para sincronização do schema.
    - `NEXTAUTH_SECRET`: segredo forte gerado, por exemplo, com `openssl rand -base64 32`.
-   - `NEXTAUTH_URL`: URL final do projeto, por exemplo `https://filazero-seu-projeto.vercel.app`.
-   - `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` e variáveis do estabelecimento inicial apenas durante a criação inicial do administrador.
-4. Faça o primeiro deploy.
+   - `NEXTAUTH_URL`: URL final do projeto, por exemplo `https://projeto-filazero.vercel.app`.
+4. Faça o deploy. **Não cadastre `SEED_ADMIN_PASSWORD` na Vercel:** as variáveis de seed devem ficar somente no `.env` local, durante a execução inicial.
 
 ## 4. Criar tabelas e administrador inicial
 
-No terminal local, com `.env` configurado para apontar ao banco Neon:
+No terminal local, copie `.env.example` para `.env` e preencha `DATABASE_URL`, `DIRECT_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` (mínimo de 12 caracteres) e os dados do estabelecimento. Mantenha esse arquivo apenas na sua máquina; ele está excluído do Git:
 
 ```bash
 npx prisma generate
@@ -43,7 +42,7 @@ npx prisma db push
 npm run db:seed
 ```
 
-O seed cria um estabelecimento de demonstração, o serviço Atendimento Geral e a conta ADMIN. Use senha inicial forte (mínimo de 12 caracteres). Depois de executar o seed, remova `SEED_ADMIN_PASSWORD` das variáveis de produção. Se necessário, execute `npm run db:seed` novamente localmente para recriar/atualizar o administrador usando a senha configurada com segurança.
+O seed cria um estabelecimento de demonstração, o serviço Atendimento Geral e a conta ADMIN. Use uma senha inicial forte (mínimo de 12 caracteres). Depois de executar o seed, remova `SEED_ADMIN_PASSWORD` do `.env` local. Se precisar atualizar a conta ADMIN, execute o seed novamente com uma nova senha temporária em ambiente local seguro.
 
 ## 5. Testar como avaliador
 
