@@ -384,19 +384,20 @@ Esta seção registra o estado observado do projeto em 12/11/2026. Os requisitos
 
 ### 9.3 Estado observado da publicação e do banco
 
-- Repositório GitHub: público, branch principal `main`, com histórico de commits de planejamento, implementação, documentação e correções.
-- Vercel: projeto Next.js vinculado ao repositório; um build de produção foi concluído com sucesso e o domínio `https://projeto-filazero.vercel.app` respondeu à consulta HTTP.
-- A proteção SSO da Vercel está habilitada para os domínios de deploy fora do domínio principal. O acesso anônimo deve ser confirmado em janela privada antes da entrega ao professor.
-- Neon: a conexão PostgreSQL respondeu à consulta de diagnóstico. Na verificação inicial, o schema público não possuía tabelas.
-- Foi preparada e testada em branch temporária uma migração com as cinco tabelas, os dois enums, índices e chaves estrangeiras definidos pelo schema Prisma. A aplicação da migração à branch principal depende de confirmação explícita do responsável.
-- O fluxo completo de cadastro, login, criação de senha e atendimento ainda não foi validado ponta a ponta contra o banco principal. Portanto, não marcar os critérios de aceite como concluídos até executar os testes descritos em `TESTES.md`.
+- Repositório GitHub: branch principal `main`, com histórico de commits de implementação, correções e documentação.
+- Vercel: projeto Next.js vinculado ao repositório. O commit de código `b26d674` concluiu o build e o deploy como READY. As alterações posteriores de documentação e de consulta pública estão em deploy automático separado.
+- Domínio de produção: `https://projeto-filazero.vercel.app`. A página inicial, login e cadastro responderam HTTP 200 na verificação. Rotas privadas sem sessão foram redirecionadas para login.
+- Neon: a migração foi aplicada à branch default `production`. Foram verificadas as cinco tabelas previstas (`User`, `Establishment`, `StaffEstablishment`, `Service`, `QueueEntry`), os dois enums (`Role`, `QueueStatus`) e seis chaves estrangeiras.
+- Na última consulta, a tabela `User` não possuía registros. O estabelecimento e o serviço iniciais ainda não foram criados pelo seed.
+- **Bloqueio de produção confirmado:** as variáveis `DATABASE_URL`, `DIRECT_URL` e `SEED_ADMIN_PASSWORD` aparecem no projeto Vercel, mas estão sem valor. A integração de gerenciamento de variáveis não aceitou persistir os segredos. Nenhuma credencial foi publicada no GitHub nem exibida em texto puro.
+- Enquanto `DATABASE_URL` e `DIRECT_URL` não forem preenchidas diretamente no painel da Vercel, as páginas que consultam o Prisma não podem ser consideradas operacionais. O build e a resposta da página inicial não comprovam a conexão de runtime com o banco.
+- A lista de estabelecimentos foi ajustada para consulta pública, conforme RF04; a criação de senha continua exigindo autenticação CLIENT.
 
-### 9.4 Pendências para considerar a entrega concluída
+### 9.4 Revisões técnicas complementares
 
-1. Confirmar e aplicar a migração do schema na branch principal do Neon.
-2. Configurar/validar `DATABASE_URL` e `DIRECT_URL` nos ambientes de produção e preview da Vercel.
-3. Criar o primeiro administrador com credencial forte e individual, por meio do seed; não usar senha padrão de exemplo.
-4. Confirmar que `SEED_ADMIN_PASSWORD` não permaneça configurada após o seed inicial.
-5. Validar cadastro, login, entrada duplicada, posição, estimativa, cancelamento, chamada, início, conclusão e isolamento entre estabelecimentos.
-6. Confirmar acesso anônimo ao domínio de produção e preencher os resultados reais em `TESTES.md`.
-
+- Adicionada edição de serviços no painel ADMIN, mantendo a consulta do serviço vinculada ao estabelecimento do administrador no servidor.
+- Cadastro de STAFF agora usa validação Zod no servidor para nome, e-mail e senha, além de tratar e-mail duplicado por concorrência.
+- Cadastro CLIENT também trata o conflito de e-mail único no servidor sem exibir erro interno.
+- A emissão e a chamada de senhas usam transação com advisory lock por serviço; cancelamento, início e conclusão usam atualizações condicionais de estado.
+- A emissão diária utiliza UTC. O fuso do estabelecimento não está modelado no banco e precisa ser confirmado antes de uma implantação comercial.
+- O estado funcional completo permanece **pendente** até preencher as conexões do Neon na Vercel, executar o seed de forma segura e validar os cenários ponta a ponta de `TESTES.md`.
