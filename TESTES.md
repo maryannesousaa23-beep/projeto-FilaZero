@@ -39,9 +39,11 @@ Este documento separa **testes executados** de **testes pendentes**. Não marque
 | Tipos e relacionamentos no Neon | **Passou** | Enums Role e QueueStatus; 6 chaves estrangeiras verificadas |
 | Conta ADMIN inicial | **Pendente** | Consulta à tabela User retornou zero registros |
 | Estabelecimento inicial | **Parcial** | O seed executado durante um build criou `filazero-seed-establishment` antes de falhar por ausência de `SEED_ADMIN_PASSWORD` |
-| Serviço inicial | **Pendente** | A execução do seed parou antes de criar `Atendimento Geral`; tabela Service sem registros |
-| Conexão Vercel → Neon | **Parcialmente comprovada** | O seed de build conseguiu gravar o estabelecimento, provando que `DATABASE_URL` funcionava naquele momento; valores sensíveis atuais são mascarados pela API e `DIRECT_URL` precisa de confirmação no painel |
-| Fluxo completo cliente → atendente → conclusão | **Pendente** | Não há usuário ADMIN nem serviço inicial; ainda não foi feito teste ponta a ponta |
+| Serviço inicial | **Passou** | `Atendimento Geral` criado no Neon com prefixo ATD, média de 10 minutos e ativo |
+| Conexão Vercel → Neon | **Passou para runtime** | `/estabelecimentos` respondeu HTTP 200 e exibiu os dados reais consultados no Neon; valores sensíveis permanecem mascarados pela API |
+| Consulta pública de estabelecimentos | **Passou** | A rota `/estabelecimentos` abriu sem sessão e exibiu o estabelecimento e serviço iniciais |
+| Conta ADMIN inicial | **Pendente** | Ainda não existe usuário na tabela User; aguarda cadastro do titular do e-mail para promoção segura |
+| Fluxo completo cliente → atendente → conclusão | **Pendente** | Ainda não existe conta ADMIN/STAFF nem usuário CLIENT para o teste ponta a ponta |
 
 ## 3. Testes unitários registrados anteriormente
 
