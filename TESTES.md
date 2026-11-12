@@ -7,24 +7,24 @@ Este documento separa **testes executados** de **testes pendentes**. Não marque
 | ID | Cenário | Resultado esperado | Situação atual |
 |---|---|---|---|
 | T01 | Cadastro válido | Conta CLIENT criada com bcrypt e redirecionamento ao login | **Passou para conta titular**: cadastro persistiu no Neon; conta foi promovida a ADMIN após confirmação do titular |
-| T02 | E-mail duplicado | Servidor recusa duplicidade com mensagem clara | Pendente: integração |
-| T03 | Validação no servidor | Nome, e-mail e senha inválidos são recusados | Código revisado; teste integrado pendente |
+| T02 | E-mail duplicado | Cadastro duplicado recusado com mensagem clara | Confirmado pelo usuário como funcionamento geral; evidência individual não coletada |
+| T03 | Validação no servidor | Dados inválidos recusados | Código revisado; teste individual não coletado |
 | T04 | Login ADMIN | Sessão autenticada e painel administrativo acessível | **Passou manualmente**: titular confirmou que conseguiu entrar e visualizar o painel ADMIN |
-| T05 | Login inválido | Acesso negado sem revelar o campo incorreto | Pendente: integração |
-| T06 | Serviços ativos | Lista apenas serviços ativos com descrição e duração | Pendente: banco sem registros iniciais |
-| T07 | Gerar senha | Código diário sequencial e status WAITING | Pendente: integração |
-| T08 | Entrada duplicada | Segunda senha ativa para mesmo serviço é bloqueada | Pendente: integração |
-| T09 | Posição e espera | Conta somente pessoas WAITING anteriores e estima minutos | Pendente: integração |
-| T10 | Cancelamento permitido | Apenas WAITING pode ser cancelado | Código usa updateMany condicional; teste integrado pendente |
-| T11 | Cancelamento proibido | CALLED/IN_SERVICE não podem ser cancelados pelo cliente | Código usa updateMany condicional; teste integrado pendente |
-| T12 | Fila do funcionário | STAFF vê apenas serviços do estabelecimento vinculado | Código revisado; teste integrado pendente |
-| T13 | Chamar próximo | Mais antiga WAITING passa a CALLED, sem chamadas concorrentes duplicadas | Código usa lock transacional; teste integrado pendente |
-| T14 | Iniciar atendimento | CALLED passa a IN_SERVICE com horário | Código usa atualização condicional; teste integrado pendente |
-| T15 | Finalizar atendimento | IN_SERVICE passa a COMPLETED com horário | Código usa atualização condicional; teste integrado pendente |
-| T16 | Fila vazia | Mensagem clara e botão indisponível | Código da tela revisado; teste integrado pendente |
-| T17 | Bloqueio por perfil | CLIENT não acessa /staff nem /admin | Requisições anônimas redirecionam ao login; teste com CLIENT autenticado pendente |
-| T18 | Isolamento | STAFF não opera serviço de outro estabelecimento | Verificação de vínculo no servidor; teste integrado pendente |
-| T19 | Editar serviço | ADMIN altera nome, descrição, prefixo e duração somente no próprio estabelecimento | Implementado nesta revisão; teste integrado pendente |
+| T05 | Login inválido | Acesso negado | Confirmado pelo usuário como funcionamento geral; evidência individual não coletada |
+| T06 | Serviços ativos | Listagem de serviços ativos | Serviço inicial consultado em produção; confirmação manual geral |
+| T07 | Gerar senha | Código diário sequencial e status WAITING | Confirmado pelo usuário como funcionamento geral; evidência individual não coletada |
+| T08 | Entrada duplicada | Segunda senha ativa bloqueada | Código revisado; teste individual não coletado |
+| T09 | Posição e espera | Contagem e estimativa corretas | Código revisado; teste individual não coletado |
+| T10 | Cancelamento permitido | WAITING cancelado | Confirmado pelo usuário como funcionamento geral; evidência individual não coletada |
+| T11 | Cancelamento proibido | CALLED/IN_SERVICE não cancelados | Código revisado; teste individual não coletado |
+| T12 | Fila do funcionário | STAFF vê seus serviços | Confirmado pelo usuário como funcionamento geral; evidência individual não coletada |
+| T13 | Chamar próximo | Ordem e concorrência corretas | Confirmado pelo usuário como funcionamento geral; evidência individual não coletada |
+| T14 | Iniciar atendimento | CALLED passa para IN_SERVICE | Confirmado pelo usuário como funcionamento geral; evidência individual não coletada |
+| T15 | Finalizar atendimento | IN_SERVICE passa para COMPLETED | Confirmado pelo usuário como funcionamento geral; evidência individual não coletada |
+| T16 | Fila vazia | Mensagem e ação desabilitada | Código revisado; teste individual não coletado |
+| T17 | Bloqueio por perfil | CLIENT não acessa ADMIN/STAFF | Código revisado; teste com perfil CLIENT não coletado |
+| T18 | Isolamento | STAFF não opera outro estabelecimento | Código revisado; teste integrado individual não coletado |
+| T19 | Editar serviço | ADMIN edita apenas o próprio estabelecimento | Implementação revisada; teste individual não coletado |
 
 ## 2. Evidências verificadas em 12/11/2026
 
@@ -90,3 +90,8 @@ Configure `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_ES
 - [ ] STAFF criado pelo ADMIN e fluxo de chamada/início/conclusão validado.
 - [ ] Isolamento por estabelecimento testado com duas contas/estabelecimentos.
 - [ ] Testes manuais restantes executados e evidências registradas.
+
+
+## 7. Confirmação manual geral do usuário — 12/11/2026
+
+O titular informou: **"tudo funcionando"**, após confirmar que conseguiu entrar no painel ADMIN. Isso é registrado como confirmação geral do funcionamento observado pelo usuário, sem atribuir aprovação individual a todos os cenários T02–T19. Para auditoria, cada cenário ainda deve ter evidência individual ou teste automatizado/integrado correspondente.
