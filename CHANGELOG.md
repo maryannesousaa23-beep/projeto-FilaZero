@@ -79,7 +79,7 @@ Este arquivo registra as decisões e revisões humanas do desenvolvimento. Atual
 - O deploy do commit `6d524f1` foi concluído como READY; o build compilou o Next.js, verificou tipos e gerou as páginas.
 - A página inicial, login e cadastro responderam HTTP 200. Rotas privadas sem sessão redirecionaram para login.
 - **Bloqueio confirmado:** `DATABASE_URL`, `DIRECT_URL` e `SEED_ADMIN_PASSWORD` estão sem valor no projeto Vercel. O painel de variáveis foi acessado, mas a integração disponível não aceitou gravar esses segredos; eles não foram colocados em texto puro nem publicados no GitHub.
-- Por esse motivo, nenhum login real, cadastro persistido ou fluxo de fila foi declarado aprovado.
+- O seed interrompido deixou um estabelecimento inicial no banco, mas não criou usuário nem serviço. Nenhum login real ou fluxo completo de fila foi declarado aprovado.
 
 ### Próximos passos obrigatórios
 1. Inserir os valores de DATABASE_URL e DIRECT_URL diretamente no painel da Vercel, como variáveis sensíveis.
