@@ -1,0 +1,71 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum Role { CLIENT STAFF ADMIN }
+enum QueueStatus { WAITING CALLED IN_SERVICE COMPLETED CANCELLED }
+
+model User {
+  id String @id @default(cuid())
+  name String @db.VarChar(120)
+  email String @unique @db.VarChar(180)
+  passwordHash String @db.VarChar(255)
+  role Role @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  staffLinks StaffEstablishment[]
+  requestedEntries QueueEntry[] @relation("QueueRequester")
+  handledEntries QueueEntry[] @relation("QueueHandler")
+}
+model Establishment {
+  id String @id @default(cuid())
+  name String @db.VarChar(150)
+  address String @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  staffLinks StaffEstablishment[]
+  services Service[]
+}
+model StaffEstablishment {
+  id String @id @default(cuid())
+  userId String
+  establishmentId String
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  establishment Establishment @relation(fields:[establishmentId], references:[id], onDelete:Cascade)
+  @@unique([userId, establishmentId])
+  @@index([establishmentId])
+}
+model Service {
+  id String @id @default(cuid())
+  establishmentId String
+  name String @db.VarChar(100)
+  description String? @db.Text
+  estimatedMinutes Int @default(10)
+  codePrefix String @default("ATD") @db.VarChar(5)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  establishment Establishment @relation(fields:[establishmentId], references:[id], onDelete:Cascade)
+  entries QueueEntry[]
+  @@index([establishmentId, isActive])
+}
+model QueueEntry {
+  id String @id @default(cuid())
+  ticketCode String @db.VarChar(15)
+  userId String
+  serviceId String
+  staffId String?
+  status QueueStatus @default(WAITING)
+  entryTime DateTime @default(now())
+  calledTime DateTime?
+  startTime DateTime?
+  endTime DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation("QueueRequester", fields:[userId], references:[id], onDelete:Cascade)
+  service Service @relation(fields:[serviceId], references:[id], onDelete:Cascade)
+  staff User? @relation("QueueHandler", fields:[staffId], references:[id], onDelete:SetNull)
+  @@index([serviceId, status, entryTime])
+  @@index([userId, status])
+  @@index([ticketCode, serviceId, entryTime])
+}
