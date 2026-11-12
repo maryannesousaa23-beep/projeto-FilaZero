@@ -58,3 +58,32 @@ Este arquivo registra as decisões e revisões humanas do desenvolvimento. Atual
 - Corrigida documentação que ainda descrevia o banco e o deploy como não configurados, distinguindo build concluído de fluxo de negócio ainda não validado.
 - **Pendente:** criar/confirmar administrador inicial e executar testes ponta a ponta com banco principal.
 - **Revisão humana:** confirmar o fuso horário UTC usado na virada diária das senhas.
+
+
+## 12/11/2026 — Auditoria técnica complementar e correções
+
+### Revisão da implementação contra a spec
+- Conferidos os requisitos RF01–RF15, RNF01–RNF10, casos de uso e critérios de aceite do arquivo entregue.
+- Confirmadas as rotas de cadastro, login, dashboard, estabelecimentos, filas, operação de funcionário e administração.
+- Confirmada a verificação de sessão e papel no servidor por meio de `requireUser` e `requireRole`.
+- Confirmado que ações de fila validam o vínculo do serviço ao estabelecimento do funcionário.
+- Confirmada a existência de transação com advisory lock para emissão/chamada de senha e atualização condicional para cancelamento/início/conclusão.
+- Identificada ausência de formulário/ação de edição de serviço; adicionados `updateServiceAction` e formulário de edição restrito ao estabelecimento do administrador.
+- Endurecida a validação server-side de cadastro de funcionários com Zod e tratamento de conflito de e-mail duplicado.
+- Tratada a corrida de cadastro duplicado de CLIENT para devolver mensagem amigável quando o índice único do banco detectar concorrência.
+
+### Estado real do Neon e da Vercel
+- Migração aplicada à branch default `production` do projeto Neon `FilaZero`.
+- Verificadas as cinco tabelas previstas, dois enums e seis chaves estrangeiras.
+- A tabela `User` continua sem registros; não há conta ADMIN criada.
+- O deploy do commit `6d524f1` foi concluído como READY; o build compilou o Next.js, verificou tipos e gerou as páginas.
+- A página inicial, login e cadastro responderam HTTP 200. Rotas privadas sem sessão redirecionaram para login.
+- **Bloqueio confirmado:** `DATABASE_URL`, `DIRECT_URL` e `SEED_ADMIN_PASSWORD` estão sem valor no projeto Vercel. O painel de variáveis foi acessado, mas a integração disponível não aceitou gravar esses segredos; eles não foram colocados em texto puro nem publicados no GitHub.
+- Por esse motivo, nenhum login real, cadastro persistido ou fluxo de fila foi declarado aprovado.
+
+### Próximos passos obrigatórios
+1. Inserir os valores de DATABASE_URL e DIRECT_URL diretamente no painel da Vercel, como variáveis sensíveis.
+2. Fazer novo deploy de produção.
+3. Executar o seed em ambiente seguro para criar estabelecimento, serviço e ADMIN.
+4. Confirmar a conta e executar os cenários ponta a ponta de TESTES.md.
+5. Reavaliar o fuso diário da emissão de senhas: a implementação atual usa UTC, conforme documentado em `lib/queue-rules.ts`.
