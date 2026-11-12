@@ -25,7 +25,7 @@ Aplicação web para que usuários retirem senhas digitais e acompanhem filas, e
    ```bash
    cp .env.example .env
    ```
-   Configure `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` e as variáveis `SEED_*`. Gere um segredo forte para `NEXTAUTH_SECRET` (por exemplo, `openssl rand -base64 32`). Use uma senha de administrador com pelo menos 12 caracteres.
+   Configure `DATABASE_URL` (conexão pooled), `DIRECT_URL` (conexão direta para o Prisma), `NEXTAUTH_SECRET`, `NEXTAUTH_URL` e as variáveis `SEED_*`. Gere um segredo forte para `NEXTAUTH_SECRET` (por exemplo, `openssl rand -base64 32`). Use uma senha de administrador com pelo menos 12 caracteres.
 3. Gere o Prisma Client e crie as tabelas:
    ```bash
    npx prisma generate
@@ -51,7 +51,7 @@ O primeiro ADMIN é criado exclusivamente pelo seed. O cadastro público cria so
 ## Variáveis de ambiente
 | Variável | Finalidade |
 |---|---|
-| `DATABASE_URL` | String de conexão PostgreSQL/Neon |
+| `DATABASE_URL` | String pooled do PostgreSQL/Neon para as requisições da aplicação |\n| `DIRECT_URL` | String direta do PostgreSQL/Neon para sincronização do schema e migrações Prisma |
 | `NEXTAUTH_SECRET` | Segredo para assinatura das sessões |
 | `NEXTAUTH_URL` | URL base da aplicação |
 | `SEED_ADMIN_NAME` | Nome do administrador inicial |
@@ -83,4 +83,4 @@ Quatro testes das regras puras podem ser executados com Node 22 mesmo sem Neon. 
 - `CHANGELOG.md`: decisões, correções e limitações registradas.
 
 ## Observação sobre o estado do projeto
-O código-fonte está preparado para execução e deploy, mas não há credenciais do GitHub, Neon ou Vercel incluídas neste pacote. Portanto, o banco remoto e a URL pública precisam ser configurados na conta do estudante antes de a entrega ser considerada publicada e validada.
+O repositório GitHub, o projeto Vercel e o domínio de produção já estão configurados. O build de produção foi concluído com sucesso e a página inicial respondeu pelo domínio público. A conexão ao Neon foi testada; a branch principal do banco ainda precisa receber o schema e o seed do administrador antes de o fluxo completo de cadastro, login e fila poder ser validado.
