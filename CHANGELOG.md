@@ -46,3 +46,15 @@ Este arquivo registra as decisões e revisões humanas do desenvolvimento. Atual
 - Adicionada biblioteca de regras puras (`lib/queue-rules.ts`) e 4 testes com Node.js nativo.
 - **Revisão humana necessária:** avaliar se o fuso desejado para reset diário é o UTC ou o local do estabelecimento, antes da entrega. UTC é provisório e determinístico.
 - **Pendente:** instalar dependências, executar build e validar o fluxo contra Neon e Vercel.
+
+
+## 12/11/2026 — Alinhamento com a spec e diagnóstico de publicação
+- Revisada a implementação contra os RF01–RF15 e RNF01–RNF10 da spec entregue.
+- Confirmada a existência das cinco entidades previstas no schema Prisma e dos três perfis de acesso.
+- Verificado build de produção concluído na Vercel e resposta da página inicial no domínio principal.
+- Diagnóstico do Neon confirmou conexão PostgreSQL; o schema público estava inicialmente vazio.
+- Preparada migração de banco em branch temporária e inspecionadas tabelas, colunas e chaves estrangeiras. A aplicação na branch principal aguarda confirmação explícita.
+- Adicionada a variável documentada `DIRECT_URL` ao exemplo de ambiente e às instruções de configuração; ela é usada pelo Prisma para operações diretas de schema.
+- Corrigida documentação que ainda descrevia o banco e o deploy como não configurados, distinguindo build concluído de fluxo de negócio ainda não validado.
+- **Pendente:** criar/confirmar administrador inicial e executar testes ponta a ponta com banco principal.
+- **Revisão humana:** confirmar o fuso horário UTC usado na virada diária das senhas.
