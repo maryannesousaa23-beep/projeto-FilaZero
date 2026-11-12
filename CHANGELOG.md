@@ -87,3 +87,13 @@ Este arquivo registra as decisões e revisões humanas do desenvolvimento. Atual
 3. Executar o seed em ambiente seguro para criar estabelecimento, serviço e ADMIN.
 4. Confirmar a conta e executar os cenários ponta a ponta de TESTES.md.
 5. Reavaliar o fuso diário da emissão de senhas: a implementação atual usa UTC, conforme documentado em `lib/queue-rules.ts`.
+
+
+## 12/11/2026 — Validação de runtime e dados iniciais
+
+- Confirmado que o seed executado durante um build criou o estabelecimento inicial antes de parar por ausência de `SEED_ADMIN_PASSWORD`.
+- A validação do seed foi movida para antes de qualquer escrita, evitando deixar novos dados parciais se a senha não estiver configurada.
+- Criado o serviço inicial `Atendimento Geral` no Neon: prefixo `ATD`, estimativa média de 10 minutos e status ativo.
+- A rota pública `/estabelecimentos` respondeu HTTP 200 no domínio de produção e exibiu o estabelecimento e o serviço lidos do Neon. Isso comprova a conexão Prisma de runtime com o banco.
+- O cadastro de usuário ADMIN permanece pendente. O caminho seguro é o titular cadastrar a própria conta em `/cadastro`; depois a conta existente pode ser promovida para ADMIN e vinculada ao estabelecimento sem compartilhar senha.
+- O deploy de código `2273060` concluiu como READY e contém a edição de serviços, validação de STAFF, listagem pública e validação segura do seed.
