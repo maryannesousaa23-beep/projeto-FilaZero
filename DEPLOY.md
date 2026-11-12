@@ -26,7 +26,8 @@ Antes, crie no GitHub um repositório vazio chamado `filazero`. Não marque para
 1. Entre em https://vercel.com e escolha **Add New → Project**.
 2. Importe o repositório `filazero`.
 3. Em **Environment Variables**, cadastre:
-   - `DATABASE_URL`: connection string do Neon.
+   - `DATABASE_URL`: connection string pooled do Neon (host com `-pooler`, SSL habilitado e `pgbouncer=true`).
+   - `DIRECT_URL`: connection string direta do Neon (host sem `-pooler`, SSL habilitado), usada pelo Prisma para sincronização do schema.
    - `NEXTAUTH_SECRET`: segredo forte gerado, por exemplo, com `openssl rand -base64 32`.
    - `NEXTAUTH_URL`: URL final do projeto, por exemplo `https://filazero-seu-projeto.vercel.app`.
    - `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` e variáveis do estabelecimento inicial apenas durante a criação inicial do administrador.
@@ -54,7 +55,11 @@ O seed cria um estabelecimento de demonstração, o serviço Atendimento Geral e
 6. Volte à conta CLIENT e confirme a atualização automática do status e o histórico.
 7. Execute os demais casos de `TESTES.md` e registre os resultados reais.
 
-## 6. Entrega ao professor
+## 6. Estado atual desta publicação
+
+O schema já foi aplicado à branch default `production` do Neon e o build Vercel do commit `6d524f1` concluiu. Entretanto, no estado verificado em 12/11/2026, `DATABASE_URL` e `DIRECT_URL` estavam sem valor nas variáveis da Vercel e a tabela `User` estava vazia. Preencha as duas variáveis sensíveis no painel da Vercel, faça novo deploy e execute o seed em ambiente local seguro antes de considerar o sistema operacional.
+
+## 7. Entrega ao professor
 
 - URL pública da aplicação Vercel.
 - URL do repositório GitHub com commits visíveis.
