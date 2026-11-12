@@ -56,7 +56,7 @@ npm install
 npm run test:unit
 ```
 
-## 4. Configuração bloqueadora antes do teste ponta a ponta
+## 4. Variáveis de ambiente e preparação final
 
 Na Vercel, abra **Project → Settings → Environment Variables** e confira, sem publicar os valores em mensagens ou no GitHub:
 
@@ -65,7 +65,7 @@ Na Vercel, abra **Project → Settings → Environment Variables** e confira, se
 - `NEXTAUTH_SECRET`: segredo forte e privado.
 - `NEXTAUTH_URL`: `https://projeto-filazero.vercel.app`.
 
-Confirme que ambas estão preenchidas para Production. O seed de build anterior comprovou que DATABASE_URL conseguiu gravar no Neon naquele momento; não foi possível ler o valor secreto atual pela integração. A página inicial, sozinha, não comprova a conexão de runtime.
+A rota `/estabelecimentos` foi testada em produção e respondeu HTTP 200 exibindo o estabelecimento e o serviço reais consultados no Neon. Isso comprova a conexão de runtime via `DATABASE_URL`. Confira `DIRECT_URL` no painel Vercel para garantir que ela use a conexão direta (sem `-pooler`) nas próximas operações de schema/migração. A senha do seed deve ficar somente no `.env` local, nunca no GitHub.
 
 ## 5. Criar dados iniciais com segurança
 
