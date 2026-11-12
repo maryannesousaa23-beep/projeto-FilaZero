@@ -27,3 +27,9 @@ Este arquivo registra as decisões e revisões humanas do desenvolvimento. Atual
 - O sistema ainda precisa ser conectado a um banco Neon real e testado com as variáveis de produção.
 - A atualização da tela de acompanhamento ocorre ao recarregar a página; atualização automática por polling/notificações pode ser acrescentada em etapa posterior.
 - O projeto precisa passar pelo teste de build e pelos casos manuais descritos em `TESTES.md` no ambiente configurado.
+
+## 2026-11-12 — Revisão de autorização e atualização de tela
+- A autorização agora reconsulta o perfil no banco em cada operação protegida, evitando confiar exclusivamente no papel contido no token da sessão.
+- As telas de acompanhamento da senha e operação do funcionário atualizam os dados automaticamente a cada cinco segundos.
+- O painel administrativo inclui gráfico simples de entradas nos últimos sete dias.
+- Revisão: consultas administrativas exigem vínculo explícito com um estabelecimento.
