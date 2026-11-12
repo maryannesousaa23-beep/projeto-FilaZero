@@ -10,6 +10,14 @@ async function main() {
   const establishmentName = process.env.SEED_ESTABLISHMENT_NAME || 'FilaZero - Estabelecimento Principal';
   const establishmentAddress = process.env.SEED_ESTABLISHMENT_ADDRESS || 'Endereço não cadastrado';
 
+  const existingAdmin = await prisma.user.findUnique({ where: { email } });
+  if (password && password.length < 12) {
+    throw new Error('SEED_ADMIN_PASSWORD deve ter pelo menos 12 caracteres.');
+  }
+  if (!password && !existingAdmin) {
+    throw new Error('SEED_ADMIN_PASSWORD é obrigatório na primeira criação do administrador.');
+  }
+
   const establishment = await prisma.establishment.upsert({
     where: { id: 'filazero-seed-establishment' },
     update: { name: establishmentName, address: establishmentAddress },
@@ -19,14 +27,6 @@ async function main() {
       address: establishmentAddress,
     },
   });
-
-  const existingAdmin = await prisma.user.findUnique({ where: { email } });
-  if (password && password.length < 12) {
-    throw new Error('SEED_ADMIN_PASSWORD deve ter pelo menos 12 caracteres.');
-  }
-  if (!password && !existingAdmin) {
-    throw new Error('SEED_ADMIN_PASSWORD é obrigatório na primeira criação do administrador.');
-  }
 
   const passwordHash = password ? await hash(password, 12) : undefined;
   const admin = await prisma.user.upsert({
