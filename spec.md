@@ -388,9 +388,9 @@ Esta seção registra o estado observado do projeto em 12/11/2026. Os requisitos
 - Vercel: projeto Next.js vinculado ao repositório. O commit de código `b26d674` concluiu o build e o deploy como READY. As alterações posteriores de documentação e de consulta pública estão em deploy automático separado.
 - Domínio de produção: `https://projeto-filazero.vercel.app`. A página inicial, login e cadastro responderam HTTP 200 na verificação. Rotas privadas sem sessão foram redirecionadas para login.
 - Neon: a migração foi aplicada à branch default `production`. Foram verificadas as cinco tabelas previstas (`User`, `Establishment`, `StaffEstablishment`, `Service`, `QueueEntry`), os dois enums (`Role`, `QueueStatus`) e seis chaves estrangeiras.
-- Na última consulta, a tabela `User` não possuía registros. O estabelecimento e o serviço iniciais ainda não foram criados pelo seed.
-- **Bloqueio de produção confirmado:** as variáveis `DATABASE_URL`, `DIRECT_URL` e `SEED_ADMIN_PASSWORD` aparecem no projeto Vercel, mas estão sem valor. A integração de gerenciamento de variáveis não aceitou persistir os segredos. Nenhuma credencial foi publicada no GitHub nem exibida em texto puro.
-- Enquanto `DATABASE_URL` e `DIRECT_URL` não forem preenchidas diretamente no painel da Vercel, as páginas que consultam o Prisma não podem ser consideradas operacionais. O build e a resposta da página inicial não comprovam a conexão de runtime com o banco.
+- Na última consulta, a tabela `User` não possuía registros, a tabela `Service` estava vazia e havia um estabelecimento (`filazero-seed-establishment`). O estabelecimento foi criado pelo seed executado durante um build, que falhou depois por ausência de `SEED_ADMIN_PASSWORD` antes de criar o administrador e o serviço.
+- Esse seed comprova que `DATABASE_URL` conseguiu gravar no Neon naquele momento. Os valores secretos atuais da Vercel são mascarados pela integração; `DIRECT_URL` precisa ser conferida diretamente no painel da Vercel. Nenhuma credencial foi publicada no GitHub nem exibida em texto puro.
+- A página inicial e o build não comprovam, sozinhos, que todas as operações Prisma de runtime estão funcionando. O fluxo completo continua pendente até criar ADMIN e serviço e executar os testes integrados.
 - A lista de estabelecimentos foi ajustada para consulta pública, conforme RF04; a criação de senha continua exigindo autenticação CLIENT.
 
 ### 9.4 Revisões técnicas complementares
