@@ -1,4 +1,134 @@
-import Link from 'next/link';import { requireUser } from '@/lib/session';import { prisma } from '@/lib/prisma';import { QueueStatus } from '@prisma/client';import { Clock3, Ticket, ArrowRight, Building2 } from 'lucide-react';
-const labels:Record<string,string>={WAITING:'Aguardando',CALLED:'Chamado',IN_SERVICE:'Em atendimento',COMPLETED:'Concluído',CANCELLED:'Cancelado'};
-export default async function Dashboard(){const user=await requireUser();if(user.role!=='CLIENT')return <main className="max-w-6xl mx-auto px-5 py-12"><div className="panel p-8"><p className="eyebrow">Área de trabalho</p><h1 className="text-3xl font-black mt-2">Olá, {user.name?.split(' ')[0]}!</h1><p className="text-slate-500 mt-2">Acesse o painel correspondente ao seu perfil.</p><div className="flex gap-3 mt-6">{user.role==='STAFF'?<Link className="btn" href="/staff">Abrir atendimento</Link>:<Link className="btn" href="/admin">Abrir gestão</Link>}</div></div></main>;
-const entries=await prisma.queueEntry.findMany({where:{userId:user.id},include:{service:{include:{establishment:true}}},orderBy:{entryTime:'desc'},take:10});const active=entries.filter(e=>[QueueStatus.WAITING,QueueStatus.CALLED,QueueStatus.IN_SERVICE].includes(e.status));return <main className="max-w-6xl mx-auto px-5 py-12"><div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4"><div><p className="eyebrow">Área do usuário</p><h1 className="text-3xl md:text-4xl font-black mt-2">Olá, {user.name?.split(' ')[0]}!</h1><p className="text-slate-500 mt-2">Acompanhe suas senhas e encontre um atendimento.</p></div><Link href="/estabelecimentos" className="btn">+ Entrar em uma fila</Link></div><div className="grid sm:grid-cols-3 gap-4 mt-8"><div className="panel p-5"><p className="text-sm text-slate-500">Senhas ativas</p><p className="text-3xl font-black mt-2">{active.length}</p></div><div className="panel p-5"><p className="text-sm text-slate-500">Atendimentos concluídos</p><p className="text-3xl font-black mt-2">{entries.filter(e=>e.status==='COMPLETED').length}</p></div><div className="panel p-5"><p className="text-sm text-slate-500">Histórico recente</p><p className="text-3xl font-black mt-2">{entries.length}</p></div></div><div className="mt-10"><h2 className="text-xl font-black">Minhas senhas</h2>{entries.length===0?<div className="panel p-10 text-center mt-4"><Ticket className="mx-auto text-slate-300" size={34}/><p className="font-bold mt-3">Você ainda não entrou em uma fila</p><p className="text-sm text-slate-500 mt-1">Escolha um estabelecimento para retirar sua primeira senha digital.</p><Link href="/estabelecimentos" className="btn mt-5">Encontrar atendimento</Link></div>:<div className="grid md:grid-cols-2 gap-4 mt-4">{entries.map(e=><Link key={e.id} href={'/filas/'+e.id} className="panel p-5 hover:border-blue-300 transition"><div className="flex justify-between gap-3"><div><p className="text-2xl font-black text-blue-600">{e.ticketCode}</p><p className="font-bold mt-1">{e.service.name}</p><p className="text-xs text-slate-500 mt-1 flex gap-1 items-center"><Building2 size={13}/>{e.service.establishment.name}</p></div><span className={'text-xs font-bold rounded-full px-3 py-1 h-fit '+(e.status==='WAITING'?'bg-amber-50 text-amber-700':e.status==='COMPLETED'?'bg-emerald-50 text-emerald-700':'bg-blue-50 text-blue-700')}>{labels[e.status]}</span></div><div className="flex justify-between items-center mt-5 pt-4 border-t border-slate-100 text-xs text-slate-400"><span>{e.entryTime.toLocaleString('pt-BR')}</span><span className="text-blue-600 font-bold flex items-center gap-1">Acompanhar <ArrowRight size={14}/></span></div></Link>)}</div>}</div></main>}
+import Link from 'next/link';
+import { requireUser } from '@/lib/session';
+import { prisma } from '@/lib/prisma';
+import { QueueStatus } from '@prisma/client';
+import { Ticket, ArrowRight, Building2 } from 'lucide-react';
+
+const labels: Record<QueueStatus, string> = {
+  WAITING: 'Aguardando',
+  CALLED: 'Chamado',
+  IN_SERVICE: 'Em atendimento',
+  COMPLETED: 'Concluído',
+  CANCELLED: 'Cancelado',
+};
+
+const activeStatuses: QueueStatus[] = [
+  QueueStatus.WAITING,
+  QueueStatus.CALLED,
+  QueueStatus.IN_SERVICE,
+];
+
+export default async function Dashboard() {
+  const user = await requireUser();
+
+  if (user.role !== 'CLIENT') {
+    return (
+      <main className="max-w-6xl mx-auto px-5 py-12">
+        <div className="panel p-8">
+          <p className="eyebrow">Área de trabalho</p>
+          <h1 className="text-3xl font-black mt-2">Olá, {user.name?.split(' ')[0]}!</h1>
+          <p className="text-slate-500 mt-2">Acesse o painel correspondente ao seu perfil.</p>
+          <div className="flex gap-3 mt-6">
+            {user.role === 'STAFF' ? (
+              <Link className="btn" href="/staff">Abrir atendimento</Link>
+            ) : (
+              <Link className="btn" href="/admin">Abrir gestão</Link>
+            )}
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const entries = await prisma.queueEntry.findMany({
+    where: { userId: user.id },
+    include: { service: { include: { establishment: true } } },
+    orderBy: { entryTime: 'desc' },
+    take: 10,
+  });
+
+  const active = entries.filter((entry) => activeStatuses.includes(entry.status));
+
+  return (
+    <main className="max-w-6xl mx-auto px-5 py-12">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow">Área do usuário</p>
+          <h1 className="text-3xl md:text-4xl font-black mt-2">Olá, {user.name?.split(' ')[0]}!</h1>
+          <p className="text-slate-500 mt-2">Acompanhe suas senhas e encontre um atendimento.</p>
+        </div>
+        <Link href="/estabelecimentos" className="btn">+ Entrar em uma fila</Link>
+      </div>
+
+      <div className="grid sm:grid-cols-3 gap-4 mt-8">
+        <div className="panel p-5">
+          <p className="text-sm text-slate-500">Senhas ativas</p>
+          <p className="text-3xl font-black mt-2">{active.length}</p>
+        </div>
+        <div className="panel p-5">
+          <p className="text-sm text-slate-500">Atendimentos concluídos</p>
+          <p className="text-3xl font-black mt-2">
+            {entries.filter((entry) => entry.status === QueueStatus.COMPLETED).length}
+          </p>
+        </div>
+        <div className="panel p-5">
+          <p className="text-sm text-slate-500">Histórico recente</p>
+          <p className="text-3xl font-black mt-2">{entries.length}</p>
+        </div>
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-xl font-black">Minhas senhas</h2>
+        {entries.length === 0 ? (
+          <div className="panel p-10 text-center mt-4">
+            <Ticket className="mx-auto text-slate-300" size={34} />
+            <p className="font-bold mt-3">Você ainda não entrou em uma fila</p>
+            <p className="text-sm text-slate-500 mt-1">
+              Escolha um estabelecimento para retirar sua primeira senha digital.
+            </p>
+            <Link href="/estabelecimentos" className="btn mt-5">Encontrar atendimento</Link>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4 mt-4">
+            {entries.map((entry) => (
+              <Link
+                key={entry.id}
+                href={'/filas/' + entry.id}
+                className="panel p-5 hover:border-blue-300 transition"
+              >
+                <div className="flex justify-between gap-3">
+                  <div>
+                    <p className="text-2xl font-black text-blue-600">{entry.ticketCode}</p>
+                    <p className="font-bold mt-1">{entry.service.name}</p>
+                    <p className="text-xs text-slate-500 mt-1 flex gap-1 items-center">
+                      <Building2 size={13} />
+                      {entry.service.establishment.name}
+                    </p>
+                  </div>
+                  <span
+                    className={
+                      'text-xs font-bold rounded-full px-3 py-1 h-fit ' +
+                      (entry.status === QueueStatus.WAITING
+                        ? 'bg-amber-50 text-amber-700'
+                        : entry.status === QueueStatus.COMPLETED
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-blue-50 text-blue-700')
+                    }
+                  >
+                    {labels[entry.status]}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mt-5 pt-4 border-t border-slate-100 text-xs text-slate-400">
+                  <span>{entry.entryTime.toLocaleString('pt-BR')}</span>
+                  <span className="text-blue-600 font-bold flex items-center gap-1">
+                    Acompanhar <ArrowRight size={14} />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
