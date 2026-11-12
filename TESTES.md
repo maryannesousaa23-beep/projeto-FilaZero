@@ -38,9 +38,10 @@ Este documento separa **testes executados** de **testes pendentes**. Não marque
 | Schema Neon na branch de produção | **Passou** | 5 tabelas: User, Establishment, StaffEstablishment, Service e QueueEntry |
 | Tipos e relacionamentos no Neon | **Passou** | Enums Role e QueueStatus; 6 chaves estrangeiras verificadas |
 | Conta ADMIN inicial | **Pendente** | Consulta à tabela User retornou zero registros |
-| Estabelecimento e serviço iniciais | **Pendente** | Seed ainda não foi executado no banco principal |
-| Conexão da aplicação Vercel ao Neon | **Bloqueada** | DATABASE_URL e DIRECT_URL existem no painel, mas estão sem valor |
-| Fluxo completo cliente → atendente → conclusão | **Pendente** | Não é possível validar sem as variáveis de conexão e dados iniciais |
+| Estabelecimento inicial | **Parcial** | O seed executado durante um build criou `filazero-seed-establishment` antes de falhar por ausência de `SEED_ADMIN_PASSWORD` |
+| Serviço inicial | **Pendente** | A execução do seed parou antes de criar `Atendimento Geral`; tabela Service sem registros |
+| Conexão Vercel → Neon | **Parcialmente comprovada** | O seed de build conseguiu gravar o estabelecimento, provando que `DATABASE_URL` funcionava naquele momento; valores sensíveis atuais são mascarados pela API e `DIRECT_URL` precisa de confirmação no painel |
+| Fluxo completo cliente → atendente → conclusão | **Pendente** | Não há usuário ADMIN nem serviço inicial; ainda não foi feito teste ponta a ponta |
 
 ## 3. Testes unitários registrados anteriormente
 
@@ -55,14 +56,14 @@ npm run test:unit
 
 ## 4. Configuração bloqueadora antes do teste ponta a ponta
 
-Na Vercel, abra **Project → Settings → Environment Variables** e preencha, sem publicar os valores em mensagens ou no GitHub:
+Na Vercel, abra **Project → Settings → Environment Variables** e confira, sem publicar os valores em mensagens ou no GitHub:
 
 - `DATABASE_URL`: URI pooled do Neon (hostname com `-pooler` e parâmetro `pgbouncer=true`).
 - `DIRECT_URL`: URI direta do Neon (hostname sem `-pooler`).
 - `NEXTAUTH_SECRET`: segredo forte e privado.
 - `NEXTAUTH_URL`: `https://projeto-filazero.vercel.app`.
 
-Depois de salvar, faça um novo deploy de produção. A aplicação precisa de DATABASE_URL e DIRECT_URL preenchidas; a página inicial, sozinha, não comprova conexão com o banco.
+Confirme que ambas estão preenchidas para Production. O seed de build anterior comprovou que DATABASE_URL conseguiu gravar no Neon naquele momento; não foi possível ler o valor secreto atual pela integração. A página inicial, sozinha, não comprova a conexão de runtime.
 
 ## 5. Criar dados iniciais com segurança
 
