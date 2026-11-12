@@ -56,7 +56,7 @@ O seed cria um estabelecimento de demonstração, o serviço Atendimento Geral e
 
 ## 6. Estado atual desta publicação
 
-O schema já foi aplicado à branch default `production` do Neon e o build Vercel do commit `6d524f1` concluiu. Entretanto, no estado verificado em 12/11/2026, `DATABASE_URL` e `DIRECT_URL` estavam sem valor nas variáveis da Vercel e a tabela `User` estava vazia. Preencha as duas variáveis sensíveis no painel da Vercel, faça novo deploy e execute o seed em ambiente local seguro antes de considerar o sistema operacional.
+O schema já foi aplicado à branch default `production` do Neon e o build Vercel do commit `6d524f1` concluiu. Um seed executado em um build conseguiu criar o estabelecimento inicial, comprovando que `DATABASE_URL` estava funcional naquele momento, mas parou por ausência de `SEED_ADMIN_PASSWORD` antes de criar o administrador e o serviço. A tabela `User` está vazia. Os valores secretos atuais são mascarados pela integração; confirme `DATABASE_URL` e `DIRECT_URL` no painel Vercel e execute o seed em ambiente local seguro antes de considerar o sistema operacional.
 
 ## 7. Entrega ao professor
 
