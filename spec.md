@@ -357,10 +357,46 @@ A integração entre Next.js, Prisma, Neon e Vercel é totalmente harmonizada e 
 
 ---
 
-## 9. Registro da implementação entregue
+## 9. Registro da implementação e validação
 
-A implementação inicial do repositório contempla as áreas de usuário comum, funcionário e administrador. O fluxo principal implementado é: cadastro/login → consulta de estabelecimento e serviço → entrada na fila com senha sequencial diária → acompanhamento da posição e estimativa → chamada, início e conclusão pelo funcionário. Também há cancelamento de senha enquanto estiver aguardando.
+Esta seção registra o estado observado do projeto em 12/11/2026. Os requisitos das seções anteriores continuam sendo a referência funcional do sistema.
 
-A aplicação utiliza Next.js App Router, TypeScript, Tailwind CSS, Prisma, PostgreSQL/Neon, NextAuth com credenciais e bcryptjs. As credenciais são fornecidas por variáveis de ambiente; o arquivo `.env` não deve ser versionado.
+### 9.1 Implementação identificada no repositório
 
-**Observação de validação:** o funcionamento em produção depende de configurar `DATABASE_URL`, `NEXTAUTH_SECRET` e `NEXTAUTH_URL`, executar as migrações/`prisma db push` e criar o primeiro administrador por meio do seed. O deploy e a validação com banco real devem ser registrados após a configuração das contas externas.
+- Aplicação construída com Next.js 14 (App Router), TypeScript e Tailwind CSS.
+- Persistência por Prisma ORM com PostgreSQL.
+- Entidades implementadas no schema: `User`, `Establishment`, `StaffEstablishment`, `Service` e `QueueEntry`.
+- Perfis `CLIENT`, `STAFF` e `ADMIN`; cadastro público cria somente usuários `CLIENT`.
+- Cadastro com validação Zod no servidor e hash bcrypt; autenticação por NextAuth Credentials.
+- Consulta de estabelecimentos e serviços ativos; entrada na fila com senha diária e bloqueio de entradas ativas duplicadas.
+- Acompanhamento de pessoas à frente e estimativa baseada no tempo médio configurado; cancelamento permitido somente enquanto a senha está aguardando.
+- Painel operacional para chamar, iniciar e concluir atendimentos, com validação de estado, vínculo ao estabelecimento e funcionário responsável.
+- Painel administrativo para gerenciar serviços e criar funcionários vinculados.
+- Atualização automática das telas operacionais por recarga periódica.
+
+### 9.2 Revisões técnicas registradas
+
+- A geração de senhas e a chamada do próximo atendimento usam transações e bloqueio consultivo por serviço para reduzir conflitos concorrentes.
+- Cancelamento, início e conclusão usam atualizações condicionais por estado; início e conclusão verificam o funcionário responsável.
+- A autorização reconsulta o perfil no banco no servidor e as operações de funcionários verificam o vínculo com o estabelecimento.
+- A numeração diária está implementada com intervalo UTC. Essa decisão é determinística, mas deve ser confirmada pelo responsável do estabelecimento caso o expediente use outro fuso horário.
+- O modelo Prisma contém `DIRECT_URL` para operações de schema/migração e `DATABASE_URL` para conexão de runtime. Ambas devem ser configuradas como variáveis de ambiente; nenhum segredo deve ser versionado.
+
+### 9.3 Estado observado da publicação e do banco
+
+- Repositório GitHub: público, branch principal `main`, com histórico de commits de planejamento, implementação, documentação e correções.
+- Vercel: projeto Next.js vinculado ao repositório; um build de produção foi concluído com sucesso e o domínio `https://projeto-filazero.vercel.app` respondeu à consulta HTTP.
+- A proteção SSO da Vercel está habilitada para os domínios de deploy fora do domínio principal. O acesso anônimo deve ser confirmado em janela privada antes da entrega ao professor.
+- Neon: a conexão PostgreSQL respondeu à consulta de diagnóstico. Na verificação inicial, o schema público não possuía tabelas.
+- Foi preparada e testada em branch temporária uma migração com as cinco tabelas, os dois enums, índices e chaves estrangeiras definidos pelo schema Prisma. A aplicação da migração à branch principal depende de confirmação explícita do responsável.
+- O fluxo completo de cadastro, login, criação de senha e atendimento ainda não foi validado ponta a ponta contra o banco principal. Portanto, não marcar os critérios de aceite como concluídos até executar os testes descritos em `TESTES.md`.
+
+### 9.4 Pendências para considerar a entrega concluída
+
+1. Confirmar e aplicar a migração do schema na branch principal do Neon.
+2. Configurar/validar `DATABASE_URL` e `DIRECT_URL` nos ambientes de produção e preview da Vercel.
+3. Criar o primeiro administrador com credencial forte e individual, por meio do seed; não usar senha padrão de exemplo.
+4. Confirmar que `SEED_ADMIN_PASSWORD` não permaneça configurada após o seed inicial.
+5. Validar cadastro, login, entrada duplicada, posição, estimativa, cancelamento, chamada, início, conclusão e isolamento entre estabelecimentos.
+6. Confirmar acesso anônimo ao domínio de produção e preencher os resultados reais em `TESTES.md`.
+
