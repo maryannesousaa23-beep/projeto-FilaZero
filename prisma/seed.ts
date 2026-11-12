@@ -21,6 +21,9 @@ async function main() {
   });
 
   const existingAdmin = await prisma.user.findUnique({ where: { email } });
+  if (password && password.length < 12) {
+    throw new Error('SEED_ADMIN_PASSWORD deve ter pelo menos 12 caracteres.');
+  }
   if (!password && !existingAdmin) {
     throw new Error('SEED_ADMIN_PASSWORD é obrigatório na primeira criação do administrador.');
   }
