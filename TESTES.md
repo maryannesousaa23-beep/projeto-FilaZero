@@ -45,7 +45,7 @@ Registre data, ambiente, resultado (Passou/Falhou) e evidência após executar c
 | Cálculo da estimativa de espera | Node.js 22, sem banco | **Passou** | `npm run test:unit` — teste 3 |
 | Limites diários em UTC | Node.js 22, sem banco | **Passou** | `npm run test:unit` — teste 4 |
 | Build do Next.js/Prisma | Ambiente sem dependências instaladas | **Não executado** | `npm install` excedeu limite disponível |
-| Fluxo ponta a ponta com banco | Neon ainda não configurado neste código | **Pendente** | Necessário banco de teste |
-| Acesso anônimo ao deploy | Vercel ainda não validada com este código | **Pendente** | Verificar domínio e proteção de acesso |
+| Conexão PostgreSQL Neon | Consulta SQL de diagnóstico | **Passou** | Banco respondeu como PostgreSQL; tabelas ainda não aplicadas à branch principal |\n| Estrutura Prisma no banco principal | Neon branch principal | **Pendente** | Migração testada em branch temporária; aguarda confirmação para aplicação |\n| Fluxo ponta a ponta com banco | Produção | **Pendente** | Executar após aplicar schema e seed do administrador |
+| Build de produção | Vercel | **Passou** | Deploy de produção marcado READY; compilação Next.js e geração do Prisma Client concluídas |\n| Resposta da página inicial | Domínio de produção | **Passou** | Consulta HTTP ao domínio principal retornou HTML da aplicação |\n| Acesso anônimo completo | Navegador sem sessão | **Pendente** | A proteção SSO está habilitada para domínios de deploy; testar acesso de avaliador |
 
 **Limitações:** testes unitários não substituem testes funcionais integrados. A página inicial tem dados ilustrativos explicitamente identificados como exemplo, não um registro real.
