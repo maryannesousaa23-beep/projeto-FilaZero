@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { requireRole, requireUser } from '@/lib/session';
 import { registerSchema, serviceSchema } from '@/lib/validators';
 import { QueueStatus, Role } from '@prisma/client';
+import { dayRangeUTC, ticketNumber } from '@/lib/queue-rules';
 
 export async function registerAction(formData: FormData) {
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
@@ -22,14 +23,14 @@ export async function createQueueEntryAction(formData: FormData) {
   const serviceId = String(formData.get('serviceId') || '');
   const service = await prisma.service.findFirst({ where: { id: serviceId, isActive: true }, include: { establishment: true } });
   if (!service) redirect('/estabelecimentos?erro=servico');
-  const now = new Date(); const start = new Date(now); start.setHours(0,0,0,0); const end = new Date(start); end.setDate(end.getDate()+1);
+  const { start, end } = dayRangeUTC(new Date());
   const result = await prisma.$transaction(async tx => {
     // Serializa a emissão por serviço e por usuário para evitar senhas repetidas em requisições simultâneas.
     await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${serviceId}))`;
     const duplicate = await tx.queueEntry.findFirst({ where: { userId: user.id, serviceId, status: { in: [QueueStatus.WAITING, QueueStatus.CALLED, QueueStatus.IN_SERVICE] } } });
     if (duplicate) return { duplicateId: duplicate.id, entry: null };
     const count = await tx.queueEntry.count({ where: { serviceId, entryTime: { gte: start, lt: end } } });
-    const ticketCode = `${service.codePrefix}-${String(count+1).padStart(3,'0')}`;
+    const ticketCode = ticketNumber(count + 1, service.codePrefix);
     const entry = await tx.queueEntry.create({ data: { ticketCode, userId: user.id, serviceId } });
     return { duplicateId: null, entry };
   });
@@ -38,29 +39,68 @@ export async function createQueueEntryAction(formData: FormData) {
 }
 
 export async function cancelQueueAction(formData: FormData) {
-  const user = await requireRole(['CLIENT']); const id = String(formData.get('entryId') || '');
-  const entry = await prisma.queueEntry.findFirst({ where: { id, userId: user.id, status: QueueStatus.WAITING } });
-  if (!entry) redirect('/dashboard?erro=cancelamento');
-  await prisma.queueEntry.update({ where: { id }, data: { status: QueueStatus.CANCELLED, endTime: new Date() } });
-  revalidatePath('/dashboard'); revalidatePath('/filas/' + id); redirect('/dashboard?cancelada=1');
+  const user = await requireRole(['CLIENT']);
+  const id = String(formData.get('entryId') || '');
+  // Comparação e gravação na mesma instrução: evita cancelar uma senha já chamada em paralelo.
+  const changed = await prisma.queueEntry.updateMany({
+    where: { id, userId: user.id, status: QueueStatus.WAITING },
+    data: { status: QueueStatus.CANCELLED, endTime: new Date() },
+  });
+  if (!changed.count) redirect('/dashboard?erro=cancelamento');
+  revalidatePath('/dashboard'); revalidatePath('/filas/' + id);
+  redirect('/dashboard?cancelada=1');
 }
 
 export async function advanceQueueAction(formData: FormData) {
-  const user = await requireRole(['STAFF','ADMIN']); const entryId = String(formData.get('entryId') || ''); const action = String(formData.get('action') || '');
-  const links = await prisma.staffEstablishment.findMany({ where: { userId: user.id }, select: { establishmentId: true } });
-  const establishmentIds = links.map(x=>x.establishmentId);
-  const entry = await prisma.queueEntry.findFirst({ where: { id: entryId, service: { establishmentId: { in: establishmentIds } } } });
+  const user = await requireRole(['STAFF', 'ADMIN']);
+  const entryId = String(formData.get('entryId') || '');
+  const operation = String(formData.get('action') || '');
+  if (!['call', 'start', 'complete'].includes(operation)) redirect('/staff?erro=acao');
+  const links = await prisma.staffEstablishment.findMany({
+    where: { userId: user.id }, select: { establishmentId: true },
+  });
+  const establishmentIds = links.map(link => link.establishmentId);
+  const entry = await prisma.queueEntry.findFirst({
+    where: { id: entryId, service: { establishmentId: { in: establishmentIds } } },
+    select: { id: true, serviceId: true },
+  });
   if (!entry) redirect('/staff?erro=permissao');
-  if (action === 'start' && entry.status === QueueStatus.CALLED) await prisma.queueEntry.update({ where: { id: entryId }, data: { status: QueueStatus.IN_SERVICE, startTime: new Date(), staffId: user.id } });
-  else if (action === 'complete' && entry.status === QueueStatus.IN_SERVICE) await prisma.queueEntry.update({ where: { id: entryId }, data: { status: QueueStatus.COMPLETED, endTime: new Date(), staffId: user.id } });
-  else if (action === 'call' && entry.status === QueueStatus.WAITING) {
-    await prisma.$transaction(async tx => {
-      const first = await tx.queueEntry.findFirst({ where: { serviceId: entry.serviceId, status: QueueStatus.WAITING }, orderBy: { entryTime: 'asc' } });
-      if (!first || first.id !== entryId) throw new Error('A fila foi atualizada. Tente novamente.');
-      await tx.queueEntry.update({ where: { id: entryId }, data: { status: QueueStatus.CALLED, calledTime: new Date(), staffId: user.id } });
+
+  // Todos os operadores do mesmo serviço usam a mesma trava transacional,
+  // protegendo as chamadas simultâneas e impedindo saltos na ordem da fila.
+  const result = await prisma.$transaction(async tx => {
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${entry.serviceId}))`;
+    if (operation === 'call') {
+      const ongoing = await tx.queueEntry.findFirst({
+        where: { serviceId: entry.serviceId, status: { in: [QueueStatus.CALLED, QueueStatus.IN_SERVICE] } },
+      });
+      if (ongoing) return false;
+      const first = await tx.queueEntry.findFirst({
+        where: { serviceId: entry.serviceId, status: QueueStatus.WAITING },
+        orderBy: [{ entryTime: 'asc' }, { id: 'asc' }],
+      });
+      if (!first || first.id !== entryId) return false;
+      const changed = await tx.queueEntry.updateMany({
+        where: { id: entryId, status: QueueStatus.WAITING },
+        data: { status: QueueStatus.CALLED, calledTime: new Date(), staffId: user.id },
+      });
+      return changed.count === 1;
+    }
+    if (operation === 'start') {
+      const changed = await tx.queueEntry.updateMany({
+        where: { id: entryId, status: QueueStatus.CALLED, staffId: user.id },
+        data: { status: QueueStatus.IN_SERVICE, startTime: new Date() },
+      });
+      return changed.count === 1;
+    }
+    const changed = await tx.queueEntry.updateMany({
+      where: { id: entryId, status: QueueStatus.IN_SERVICE, staffId: user.id },
+      data: { status: QueueStatus.COMPLETED, endTime: new Date() },
     });
-  }
+    return changed.count === 1;
+  });
   revalidatePath('/staff'); revalidatePath('/dashboard');
+  if (!result) redirect('/staff?erro=fila-atualizada');
 }
 
 export async function createServiceAction(formData: FormData) {

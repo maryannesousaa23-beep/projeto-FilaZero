@@ -33,3 +33,16 @@ Este arquivo registra as decisões e revisões humanas do desenvolvimento. Atual
 - As telas de acompanhamento da senha e operação do funcionário atualizam os dados automaticamente a cada cinco segundos.
 - O painel administrativo inclui gráfico simples de entradas nos últimos sete dias.
 - Revisão: consultas administrativas exigem vínculo explícito com um estabelecimento.
+
+
+## 12/11/2026 — Revisão local adicional (código, sem deploy)
+- Reutilizada a base funcional existente; a conexão Neon/Vercel não é pré-requisito para revisar código.
+- Corrigida operação concorrente da fila: chamada serializada por serviço e atualização condicional no banco para impedir duas chamadas conflitantes.
+- Cancelamento passa a conferir o estado diretamente no `updateMany`, evitando cancelar atendimento já chamado.
+- Início/finalização verificam o responsável pela chamada e o estado atual; não é permitido avançar atendimento de outro funcionário.
+- Numeração das senhas usa intervalo diário UTC fixo, documentando o critério de virada de dia.
+- Ordenação de atendimentos inclui `id` como critério secundário para empates de horário.
+- Tela de administração de serviços e funcionários agora bloqueia administradores sem estabelecimento vinculado, evitando consulta ampla por filtro ausente.
+- Adicionada biblioteca de regras puras (`lib/queue-rules.ts`) e 4 testes com Node.js nativo.
+- **Revisão humana necessária:** avaliar se o fuso desejado para reset diário é o UTC ou o local do estabelecimento, antes da entrega. UTC é provisório e determinístico.
+- **Pendente:** instalar dependências, executar build e validar o fluxo contra Neon e Vercel.

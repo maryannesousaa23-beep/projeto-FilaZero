@@ -35,3 +35,17 @@ Registre data, ambiente, resultado (Passou/Falhou) e evidência após executar c
 - [ ] Teste em janela anônima, sem login em serviços externos.
 
 **Não marque testes como aprovados sem executá-los.**
+
+## Execução registrada — 12/11/2026
+
+| Verificação | Ambiente | Resultado | Evidência |
+|---|---|---|---|
+| Regras de transição de estado | Node.js 22, sem banco | **Passou** | `npm run test:unit` — teste 1 |
+| Numeração e validação de senha | Node.js 22, sem banco | **Passou** | `npm run test:unit` — teste 2 |
+| Cálculo da estimativa de espera | Node.js 22, sem banco | **Passou** | `npm run test:unit` — teste 3 |
+| Limites diários em UTC | Node.js 22, sem banco | **Passou** | `npm run test:unit` — teste 4 |
+| Build do Next.js/Prisma | Ambiente sem dependências instaladas | **Não executado** | `npm install` excedeu limite disponível |
+| Fluxo ponta a ponta com banco | Neon ainda não configurado neste código | **Pendente** | Necessário banco de teste |
+| Acesso anônimo ao deploy | Vercel ainda não validada com este código | **Pendente** | Verificar domínio e proteção de acesso |
+
+**Limitações:** testes unitários não substituem testes funcionais integrados. A página inicial tem dados ilustrativos explicitamente identificados como exemplo, não um registro real.

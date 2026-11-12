@@ -69,6 +69,14 @@ O primeiro ADMIN é criado exclusivamente pelo seed. O cadastro público cria so
 4. Antes do primeiro acesso, aplique o schema (`npx prisma db push`) e execute o seed com as variáveis `SEED_*` em ambiente seguro. Não mantenha a senha de seed após a criação inicial; remova-a das variáveis da Vercel depois.
 5. Faça o deploy e teste o link de produção em janela anônima.
 
+## Teste unitário sem banco
+
+```bash
+npm run test:unit
+```
+
+Quatro testes das regras puras podem ser executados com Node 22 mesmo sem Neon. O dia da senha é contado em **UTC** e pode ser adaptado para o fuso definido pelo estabelecimento. Os testes de cadastro e integração precisam de banco real.
+
 ## Testes e documentação
 - `spec.md`: requisitos, modelo de dados e critérios de aceite.
 - `TESTES.md`: roteiro de testes funcionais e de segurança.
